@@ -1,64 +1,43 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+plugins {
+    kotlin("jvm") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    id("org.springframework.boot") version "3.4.1"
+    id("io.spring.dependency-management") version "1.1.7"
+}
 
+group = "com.yetanotherdevblog"
 version = "1.0.0-SNAPSHOT"
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { setUrl("https://repo.spring.io/milestone") }
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
-
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.0.M1")
-    }
-}
-
-plugins {
-    val kotlinVersion = "1.1.2"
-    id("org.jetbrains.kotlin.jvm") version kotlinVersion
-    id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion
-    id("org.jetbrains.kotlin.plugin.noarg") version kotlinVersion
-    id("io.spring.dependency-management") version "1.0.3.RELEASE"
-}
-
-apply {
-    plugin("org.springframework.boot")
 }
 
 repositories {
     mavenCentral()
-    maven { setUrl("https://repo.spring.io/milestone") }
-    maven { setUrl("https://repo.spring.io/snapshot") }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-
-noArg {
-    annotation("org.springframework.data.mongodb.core.mapping.Document")
 }
 
 dependencies {
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jre8")
-    compile("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
 
-    compile("org.springframework.boot:spring-boot-starter-webflux") {
-        exclude(module = "hibernate-validator")
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
     }
-    compileOnly("org.springframework:spring-context-indexer")
-    compile("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.thymeleaf.extras:thymeleaf-extras-java8time:3.0.0.RELEASE")
+}
 
-    testCompile("org.springframework.boot:spring-boot-starter-test")
-    runtime("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
-
-    compile("io.projectreactor:reactor-kotlin-extensions:1.0.0.M2")
-    testCompile("io.projectreactor.addons:reactor-test")
-
-    compile("com.fasterxml.jackson.module:jackson-module-kotlin")
-    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
