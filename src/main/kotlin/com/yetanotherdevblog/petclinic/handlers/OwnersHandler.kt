@@ -1,16 +1,15 @@
 package com.yetanotherdevblog.petclinic.handlers
 
 import com.yetanotherdevblog.petclinic.html
-import com.yetanotherdevblog.petclinic.repositories.OwnersRepository
-
 import com.yetanotherdevblog.petclinic.model.Owner
 import com.yetanotherdevblog.petclinic.model.Pet
 import com.yetanotherdevblog.petclinic.model.Visit
+import com.yetanotherdevblog.petclinic.repositories.OwnersRepository
 import com.yetanotherdevblog.petclinic.repositories.PetRepository
 import com.yetanotherdevblog.petclinic.repositories.PetTypeRepository
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Criteria.*
+import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyExtractors
@@ -18,9 +17,7 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import reactor.core.publisher.Mono
-import reactor.util.function.component1
-import reactor.util.function.component2
-import java.util.UUID
+import java.util.*
 
 @Component
 class OwnersHandler(val ownersRepository: OwnersRepository,
@@ -49,17 +46,24 @@ class OwnersHandler(val ownersRepository: OwnersRepository,
                     .flatMap { ok().html().render("owners/edit", it) }
 
     fun view(serverRequest: ServerRequest) =
-            serverRequest.queryParam("id").map { ownersRepository.findById(it) }.orElse(Mono.empty<Owner>())
-                    .and({ (id) -> petRepository.findAllByOwner(id).collectList() })
-                .flatMap { (owner, pets) ->
-                    val model = mapOf<String, Any>(
+        serverRequest.queryParam("id")
+            .map { id -> ownersRepository.findById(id) }
+            .orElse(Mono.empty())
+            .flatMap { owner ->
+                petRepository.findAllByOwner(owner.id)
+                    .collectList()
+                    .flatMap { pets ->
+                        val model = mapOf(
                             "owner" to owner,
                             "pets" to pets,
-                            "petTypes" to petTypeRepository.findAll().collectMap({ it.id }, {it.name}),
-                            "petVisits" to petVisits(pets.map { it.id }))
-                    ok().html().render("owners/view", model)
-                }
-                .switchIfEmpty(ServerResponse.notFound().build())
+                            "petTypes" to petTypeRepository.findAll()
+                                .collectMap({ it.id }, { it.name }),
+                            "petVisits" to petVisits(pets.map { it.id })
+                        )
+                        ok().html().render("owners/view", model)
+                    }
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
 
     fun petVisits(petIds: List<String>) =
             mongoTemplate.find(Query(where("petId").`in`(petIds) ), Visit::class.java)

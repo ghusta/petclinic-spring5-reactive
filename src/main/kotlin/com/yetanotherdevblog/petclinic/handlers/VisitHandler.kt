@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyExtractors
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse.ok
-import java.util.UUID
+import reactor.core.publisher.Mono
+import java.util.*
 
 @Component
 class VisitHandler(val visitRepository: VisitRepository,
@@ -40,22 +41,26 @@ class VisitHandler(val visitRepository: VisitRepository,
                     }
                     .then(ownersHandler.indexPage())
 
-
     fun editPage(serverRequest: ServerRequest) =
-            visitRepository.findById(
-                    serverRequest.queryParam("id").orElseThrow({ IllegalArgumentException() }))
-                .and { petRepository.findById(it.petId) }
-                .map {
-                    val (visit, pet) = Pair(it.t1, it.t2)
-                    mapOf(
-                        Pair("id", visit.id),
-                        Pair("date", visit.visitDate.toStr()),
-                        Pair("description", visit.description),
-                        Pair("pet", pet),
-                        Pair("owner", ownersRepository.findById(pet.owner)))
-                }
-                .flatMap { ok().html().render("visits/edit", it) }
-
+        serverRequest.queryParam("id")
+            .map { visitId -> visitRepository.findById(visitId) }
+            .orElse(Mono.error(IllegalArgumentException("Visit ID is required")))
+            .flatMap { visit ->
+                petRepository.findById(visit.petId)
+                    .zipWith(ownersRepository.findById(visit.petId)) // Combine pet and owner
+                    .flatMap { tuple ->
+                        val pet = tuple.t1 // Access the first element of Tuple2
+                        val owner = tuple.t2 // Access the second element of Tuple2
+                        val model = mapOf(
+                            "id" to visit.id,
+                            "date" to visit.visitDate.toStr(),
+                            "description" to visit.description,
+                            "pet" to pet,
+                            "owner" to owner
+                        )
+                        ok().render("visits/edit", model)
+                    }
+            }
 
     fun edit(serverRequest: ServerRequest) =
             serverRequest.body(BodyExtractors.toFormData())
