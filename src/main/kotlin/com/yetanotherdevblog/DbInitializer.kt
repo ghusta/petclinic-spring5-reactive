@@ -2,6 +2,8 @@ package com.yetanotherdevblog
 
 import com.yetanotherdevblog.petclinic.model.*
 import com.yetanotherdevblog.petclinic.repositories.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 import reactor.core.Disposable
@@ -18,6 +20,8 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
                     val petRepository: PetRepository,
                     val visitRepository: VisitRepository): CommandLineRunner {
 
+    val log: Logger = LoggerFactory.getLogger(DbInitializer::class.java)
+
     override fun run(vararg args: String?) {
 
         val ownerId = UUID.fromString("5bead0d3-cd7b-41e5-b064-09f48e5e6a08").toString()
@@ -30,7 +34,7 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
             val petTypes = listOf("cat", "lizard", "snake", "bird", "hamster", "dog")
                     .map { if (it == "dog") PetType(name=it, id = dogId) else PetType(name = it) }
             petTypeRepository.saveAll(petTypes)
-                    .subscribeOnComplete { println("Added  PetTypes") }
+                .subscribeOnComplete { log.info("Added  PetTypes") }
         }
 
 
@@ -38,7 +42,7 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
             val specialities = listOf("radiology", "dentistry", "surgery")
                     .map {Speciality(name = it)}
             specialityRepository.saveAll(specialities)
-                    .subscribeOnComplete { println("Added  Specialities") }
+                .subscribeOnComplete { log.info("Added  Specialities") }
         }
 
         vetRepository.deleteAll().subscribeOnComplete {
@@ -49,7 +53,7 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
                     Vet(firstName = "Rafael", lastName="Ortega", specialities = setOf("surgery")),
                     Vet(firstName = "Henry", lastName="Stevens", specialities = setOf("radiology")),
                     Vet(firstName = "Sharon", lastName="Jenkins")))
-                    .subscribeOnComplete { println("Added  Vets") }
+                .subscribeOnComplete { log.info("Added  Vets") }
         }
 
         ownersRepository.deleteAll().subscribeOnComplete {
@@ -58,7 +62,7 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
                             telephone = "+44 4444444", address = "Road St",
                             city = "Serverless",
                             id = ownerId)))
-                    .subscribeOnComplete { println("Added  Owners") }
+                .subscribeOnComplete { log.info("Added  Owners") }
         }
 
         petRepository.deleteAll().subscribeOnComplete {
@@ -66,7 +70,7 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
                     Pet(id = petId, name = "Pet 1", birthDate = LocalDate.now(), type = dogId, owner = ownerId),
                     Pet(id = secondPetId, name = "Pet 2", birthDate = LocalDate.now(), type = dogId, owner = ownerId),
                     Pet(id = thirdPetId, name = "Pet 3", birthDate = LocalDate.now(), type = dogId, owner = ownerId)))
-                    .subscribeOnComplete { println("Added Pets") }
+                .subscribeOnComplete { log.info("Added Pets") }
         }
 
         visitRepository.deleteAll().subscribeOnComplete {
@@ -75,7 +79,7 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
                     Visit(visitDate= LocalDate.now(), description = "Visit description ${Random().nextInt()}", petId= petId),
                     Visit(visitDate= LocalDate.now(), description = "Visit description ${Random().nextInt()}", petId= petId),
                     Visit(visitDate= LocalDate.now(), description = "Visit description ${Random().nextInt()}", petId= secondPetId)))
-                    .subscribeOnComplete { println("Added Visits") }
+                .subscribeOnComplete { log.info("Added Visits") }
         }
 
     }
