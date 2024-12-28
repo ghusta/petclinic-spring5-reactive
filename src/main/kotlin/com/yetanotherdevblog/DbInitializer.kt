@@ -57,11 +57,22 @@ class DbInitializer(val petTypeRepository: PetTypeRepository,
         }
 
         ownersRepository.deleteAll().subscribeOnComplete {
-            ownersRepository.saveAll(listOf(
-                    Owner(firstName = "James", lastName="Owner",
-                            telephone = "+44 4444444", address = "Road St",
-                            city = "Serverless",
-                            id = ownerId)))
+            ownersRepository.saveAll(
+                listOf(
+                    Owner(
+                        firstName = "James", lastName = "Owner",
+                        telephone = "+44 4444444", address = "Road St",
+                        city = "Serverless",
+                        id = ownerId
+                    ),
+                    Owner(
+                        firstName = "John", lastName = "Doe",
+                        telephone = "+44 1234567", address = "Church St",
+                        city = "London",
+                        id = UUID.randomUUID().toString()
+                    )
+                )
+            )
                 .subscribeOnComplete { log.info("Added  Owners") }
         }
 
