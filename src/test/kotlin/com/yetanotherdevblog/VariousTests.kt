@@ -2,15 +2,12 @@ package com.yetanotherdevblog
 
 import com.yetanotherdevblog.petclinic.toLocalDate
 import com.yetanotherdevblog.petclinic.toStr
-import org.junit.Assert
-import org.junit.Test
-import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
 import java.time.LocalDate
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-@RunWith(SpringRunner::class)
 @SpringBootTest
 class VariousTests {
 
@@ -27,17 +24,17 @@ class VariousTests {
      */
     @Test
     fun `@Value properties needs escaping`() {
-        Assert.assertEquals(customProperty, "Lorem Ipsum")
+        assertEquals(customProperty, "Lorem Ipsum")
     }
 
     @Test
     fun `Test LocalDate#toStr extension method`() {
-        Assert.assertEquals(LocalDate.of(1970, 1, 1).toStr(), "01/01/1970")
+        assertEquals(LocalDate.of(1970, 1, 1).toStr(), "01/01/1970")
     }
 
     @Test
     fun `Test String#toLocalDate extension method`() {
-        Assert.assertEquals("01/01/1970".toLocalDate(), LocalDate.of(1970, 1, 1))
+        assertEquals("01/01/1970".toLocalDate(), LocalDate.of(1970, 1, 1))
     }
 
 }

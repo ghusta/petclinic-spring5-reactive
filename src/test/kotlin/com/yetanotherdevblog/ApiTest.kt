@@ -2,23 +2,16 @@ package com.yetanotherdevblog
 
 import com.yetanotherdevblog.petclinic.model.Owner
 import com.yetanotherdevblog.petclinic.repositories.PetRepository
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.web.server.LocalServerPort
-import org.springframework.http.HttpStatus
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.MediaType
-import org.springframework.test.context.junit4.SpringRunner
-import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.test
-import reactor.core.publisher.toMono
-import java.time.Duration
+import reactor.kotlin.test.test
+import kotlin.test.assertEquals
 
-@RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApiTest {
 
@@ -30,7 +23,7 @@ class ApiTest {
     @Autowired
     lateinit var petRepository: PetRepository
 
-    @Before
+    @BeforeEach
     fun setup() {
         client = WebClient.create("http://localhost:$port")
     }

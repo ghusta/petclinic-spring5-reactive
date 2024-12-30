@@ -1,9 +1,11 @@
 package com.yetanotherdevblog
 
+import com.mongodb.assertions.Assertions.assertFalse
+import com.mongodb.assertions.Assertions.assertTrue
 import com.yetanotherdevblog.petclinic.model.Owner
-import org.junit.Assert.*
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
 import java.util.*
+import kotlin.test.Test
 
 class CollectionTests {
 
